@@ -1,0 +1,162 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+//char OperationCheck(char input[]);
+void Initial();
+void LD(char filename[]);
+void Test();
+
+
+typedef struct Node {
+    char *suit;
+    char *value;
+    struct Node *prev;
+    struct Node *next;
+}Node;
+
+Node* createCard(char *suit, char *value);
+Node* createDeck();
+void SW(Node* head);
+
+
+const char suits[4] = {'C', 'D', 'H', 'S'};
+const char values[13] = {'A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'};
+
+int main(void) {
+    Initial();
+
+    char Input[100];
+    char Operation[20];    //Initializing Operation
+    char ExtraOperation[20];
+
+    //exit program if operation is QQ
+    while (strcmp(Operation, "QQ") != 0) {
+
+
+        //Takes inputs from the terminal and puts it in our Input array
+        if (fgets(Input, sizeof(Input), stdin) != NULL) {
+
+            //returns the number of inputs succesfully assigned and matched from our input array.
+            //If there is only one string in our Input, then will Operation only be assigned, and it
+            //will return 1.
+            int Operations = sscanf(Input, "%s %s", Operation, ExtraOperation);
+
+            if ((Operations == 1) && (strcmp(Operation, "LD") == 0)) {
+                LD("None");
+            } else if ((Operations == 2) && (strcmp(Operation, "LD") == 0)) {
+                LD(ExtraOperation);
+            }
+        }
+    }
+}
+
+void Initial( ) {
+    printf("c1\tc2\tc3\tc4\tc5\tc6\tc7\n"
+           "\t\t\t\t\t\t\t[]\tF1\n\n"
+           "\t\t\t\t\t\t\t[]\tF2\n\n"
+           "\t\t\t\t\t\t\t[]\tF3\n\n"
+           "\t\t\t\t\t\t\t[]\tF4\n\n"
+           "LAST Command: \n"
+           "Message: \n"
+           "INPUT >");
+}
+
+
+void LD(char filename[]){
+
+    if (strcmp(filename, "None") == 0) {
+
+        Node* deck = createDeck();
+
+        SW(deck);
+
+        printf("c1\tc2\tc3\tc4\tc5\tc6\tc7\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\tF1\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\tF2\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\tF3\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\tF4\n"
+           "[]\t[]\t[]\t\t\t\t\t\n"
+           "LAST Command: LD\n"
+           "Message: OK\n"
+           "INPUT >");
+    }
+}
+
+
+Node* createCard(char *suit, char *value) {
+
+    Node* newCard = (Node*)malloc(sizeof(Node));
+
+    newCard -> suit = (char*)malloc(2);
+    newCard -> value = (char*)malloc(2);
+
+    newCard->suit[0] = suit;
+    newCard->suit[1] = '\0';
+
+    newCard->value[0] = value;
+    newCard->value[1] = '\0';
+
+    newCard -> next = NULL;
+    newCard -> prev = NULL;
+
+    return newCard;
+}
+
+Node* createDeck() {
+    Node* head = NULL;
+    Node* previous = NULL;
+
+    for (int i = 0; i < sizeof(suits); i++) {
+        for (int j = 0; j < sizeof(values); j++) {
+            Node* newCard = createCard(suits[i], values[j]);
+            if (i==0 && j == 0) {
+                newCard->prev = NULL;
+                head = newCard;
+                previous = newCard;
+            }else {
+                if (i == 3 && j == 12) {
+                    newCard->next = NULL;
+                }
+                previous->next = newCard;
+                newCard->prev = previous;
+                previous = newCard;
+            }
+        }
+    }
+    return head;
+}
+
+void SW(Node* head) {
+
+    Node* temp = head;
+
+    while (temp) {
+        printf("%s\t  ", temp->value);
+        temp = temp->next;
+    }
+    printf("NULL\n");
+}
+
+FILE loadFile(FILE *n) {
+    if (n==NULL) {
+        printf("%s", "File doesn't exist");
+    }
+
+    FILE* fptr =fopen(n,"r");
+
+    int fullsuit[12];
+
+    fgets(fullsuit,12,fptr);
+
+    for (int i = 1; i<12;i++) {
+        createCard(fullsuit[i],fullsuit[i]);
+    }
+
+    fclose(fptr);
+
+}
+
