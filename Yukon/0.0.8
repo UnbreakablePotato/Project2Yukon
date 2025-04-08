@@ -1,0 +1,380 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+//char OperationCheck(char input[]);
+void Initial();
+void LD(char filename[]);
+void SW();
+char LDprint(char input[]);
+void SD(char filename[]);
+
+typedef struct Node {
+    char *value;
+    struct Node *prev;
+    struct Node *next;
+}Node;
+
+Node* head = NULL;
+Node* previous = NULL;
+Node* createCard(char* value);
+void createDeck();
+void printList(Node* head);
+char createDeckFile(char filename[]);
+
+
+const char* values[52] = {"AC", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "TC", "JC", "QC", "KC",
+                        "AD", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "TD", "JD", "QD", "KD",
+                        "AH", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "TH", "JH", "QH", "KH",
+                        "AS", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "TS", "JS", "QS", "KS"};
+
+int main(void) {
+    Initial();
+
+    char Input[100];
+    char Operation[20];    //Initializing Operation
+    char ExtraOperation[20];
+
+    //exit program if operation is QQ
+    while (strcmp(Operation, "QQ") != 0) {
+
+
+        //Takes inputs from the terminal and puts it in our Input array
+        if (fgets(Input, sizeof(Input), stdin) != NULL) {
+
+            //returns the number of inputs succesfully assigned and matched from our input array.
+            //If there is only one string in our Input, then will Operation only be assigned, and it
+            //will return 1.
+            int Operations = sscanf(Input, "%s %s", Operation, ExtraOperation);
+
+            if ((Operations == 1) && (strcmp(Operation, "LD") == 0)) {
+                LD("None");
+            } else if ((Operations == 2) && (strcmp(Operation, "LD") == 0)) {
+                LD(ExtraOperation);
+            }else if ((Operations == 1) && (strcmp(Operation, "SW") == 0)) {
+                SW();
+            }else if ((Operations == 1) && (strcmp(Operation, "SD") == 0)) {
+                SD("None");
+            }else if ((Operations == 2) && (strcmp(Operation, "SD") == 0)) {
+                SD(ExtraOperation);
+            }
+        }
+    }
+}
+
+void Initial( ) {
+    printf("c1\tc2\tc3\tc4\tc5\tc6\tc7\n"
+           "\t\t\t\t\t\t\t[]\tF1\n\n"
+           "\t\t\t\t\t\t\t[]\tF2\n\n"
+           "\t\t\t\t\t\t\t[]\tF3\n\n"
+           "\t\t\t\t\t\t\t[]\tF4\n\n"
+           "LAST Command: \n"
+           "Message: \n"
+           "INPUT >");
+}
+
+
+void LD(char filename[]){
+
+    if (strcmp(filename, "None") == 0) {
+
+        createDeck();
+
+        LDprint("OK");
+
+    }else{
+        if (createDeckFile(filename)) {
+            LDprint("OK");
+        }
+    }
+}
+
+
+Node* createCard(char* value) {
+
+    Node* newCard = (Node*)malloc(sizeof(Node));
+
+    newCard->value = (char*)malloc(strlen(value) + 1);  // +1 for '\0'
+
+    strcpy(newCard->value, value);
+
+    newCard -> next = NULL;
+    newCard -> prev = NULL;
+
+    return newCard;
+}
+
+void createDeck() {
+
+    for (int i = 0; i < 52; i++) {
+        Node* newCard = createCard(values[i]);
+        if (i==0) {
+            newCard->prev = NULL;
+            head = newCard;
+            previous = newCard;
+        }else {
+            if (i == 51) {
+                newCard->next = NULL;
+            }
+            previous->next = newCard;
+            newCard->prev = previous;
+            previous = newCard;
+        }
+    }
+}
+
+char createDeckFile(char filename[]) {
+    FILE* file = fopen(filename,"r");
+
+    char Deckarray[52][3];
+    char Extra[10];
+
+    for (int i = 0; i<52;i++) {
+        fscanf(file,"%s", &Deckarray[i]);
+    }
+    for (int i = 0; i<10; i++) {
+        fscanf(file,"%s", &Extra[i]);
+    }
+
+    //Check if file exist
+    if (file == NULL) {
+        LDprint("ERROR: no existing file.");
+        return 0;
+    }
+
+    //check if deck/file is too small
+    for (int i = 0; i < 52; i++) {
+        if (strcmp(Deckarray[i], "") == 0) {
+            LDprint("ERROR deck is too small");
+            return 0;
+        }
+    }
+
+    //check if deck/file is too big
+    if (strcmp(Extra, "") != 0) {
+        LDprint("ERROR deck is too big");
+        return 0;
+    }
+
+    //Check if file has legitimate cards
+    for (int i = 0; i < 52; i++) {
+        int found = 0;
+        for (int j = 0; j < 52; j++) {
+            if (strcmp(Deckarray[i], values[j]) == 0) {
+                found = 1;
+            }
+        }
+        if (found == 0) {
+            printf("c1\tc2\tc3\tc4\tc5\tc6\tc7\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\tF1\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\tF2\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\tF3\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\tF4\n"
+           "[]\t[]\t[]\t\t\t\t\t\n"
+           "LAST Command: LD\n"
+           "Message: ERROR at line %d in the file \n"
+           "INPUT >", i+1);
+            return 0;
+        }
+    }
+
+
+
+        //check if deck has duplicates
+        for (int i = 0; i < 52; i++) {
+            for (int j = 0; j < 52; j++) {
+                if (i != j) {
+                    if (strcmp(Deckarray[i], Deckarray[j])==0) {
+                        printf("c1\tc2\tc3\tc4\tc5\tc6\tc7\n"
+                        "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\tF1\n"
+                        "[]\t[]\t[]\t[]\t[]\t[]\t[]\n"
+                        "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\tF2\n"
+                        "[]\t[]\t[]\t[]\t[]\t[]\t[]\n"
+                        "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\tF3\n"
+                        "[]\t[]\t[]\t[]\t[]\t[]\t[]\n"
+                        "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\tF4\n"
+                        "[]\t[]\t[]\t\t\t\t\t\n"
+                        "LAST Command: LD\n"
+                        "Message: ERROR duplicate detected: %s \n"
+                        "INPUT >", Deckarray[i]);
+                        return 0;
+                    }
+                }
+            }
+        }
+
+        fclose(file);
+
+        for (int i = 0; i < 52; i++) {
+            Node* newCard = createCard(Deckarray[i]);
+            if (i==0) {
+                newCard->prev = NULL;
+                head = newCard;
+                previous = newCard;
+            }else {
+                if (i == 51) {
+                    newCard->next = NULL;
+                }
+                previous->next = newCard;
+                newCard->prev = previous;
+                previous = newCard;
+            }
+        }
+        return 1;
+    }
+
+char LDprint(char input[]) {
+    printf("c1\tc2\tc3\tc4\tc5\tc6\tc7\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\tF1\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\tF2\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\tF3\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\n"
+           "[]\t[]\t[]\t[]\t[]\t[]\t[]\t[]\tF4\n"
+           "[]\t[]\t[]\t\t\t\t\t\n"
+           "LAST Command: LD\n"
+           "Message: %s \n"
+           "INPUT >", input);
+}
+
+void SW() {
+    Node* temp = head;
+    int line = 0;
+
+    printf("c1\tc2\tc3\tc4\tc5\tc6\tc7\n\n");
+    for (int row = 0; row < 8; row++) {
+        for (int column = 0; column < 7; column++) {
+            if ((column < 3 && row < 8) || (column >= 3 && row < 7)) {
+                if (temp) {
+                    printf("%s\t", temp->value);
+                    temp = temp->next;
+                } else {
+                    printf("\t");
+                }
+            } else {
+                printf("\t");
+            }
+        }
+
+        line++;
+        if (line == 1) {
+            printf("[]\tF1");
+        }else if (line == 3) {
+            printf("[]\tF2");
+        }else if (line == 5) {
+            printf("[]\tF3");
+        }else if (line == 7) {
+            printf("[]\tF4");
+        }
+        printf("\n");
+    }
+    if (head != NULL) {
+        printf("LAST Command: SW\n"
+            "Message:OK.\n"
+            "INPUT >");
+    } else if (head==NULL) {
+        printf("LAST Command: SW\n"
+           "Message: ERROR: No deck provided.\n"
+           "INPUT >");
+    }
+
+}
+
+//Split funktion
+void deckSplit(int n) {
+    if(n==0){
+        for(int i = 1; i<26;i++){
+            //Node* headFirstLL = nullptr;
+            Node* newCard = createCard(values[i]);
+            if (i==0) {
+                newCard->prev = NULL;
+                head = newCard; //skal ændres til headFirstLL
+                previous = newCard;
+            }
+            for(int j = 1;j<52;j++){
+                if(j>=27){
+                    //Node* headSecondLL = nullptr;
+                    Node* newCard = createCard(values[i]);
+                    if (i==0) {
+                        newCard->prev = NULL;
+                        head = newCard; //skal ændres til headSecondLL
+                        previous = newCard;
+                    }
+                }
+            }
+        }
+        //Her skal linked lists merges
+        /*
+         for(int i=1;i<
+         */
+
+
+    } else{
+        for(int i = 1; i<n;i++){
+            //Node* headFirstLL = nullptr;
+            Node* newCard = createCard(values[i]);
+            if (i==0) {
+                newCard->prev = NULL;
+                head = newCard; //skal ændres til headFirstLL
+                previous = newCard;
+            }
+            for(int j = 1;j<52;j++){
+                if(j>=n+1){
+                    //Node* headSecondLL = nullptr;
+                    Node* newCard = createCard(values[i]);
+                    if (i==0) {
+                        newCard->prev = NULL;
+                        head = newCard; //skal ændres til headSecondLL
+                        previous = newCard;
+                    }
+                }
+            }
+        }
+        //her skal linked lists merges
+
+    }
+}
+
+void SD(char filename[]) {
+
+    if (head == NULL) {
+        printf("c1\tc2\tc3\tc4\tc5\tc6\tc7\n"
+           "\t\t\t\t\t\t\t[]\tF1\n\n"
+           "\t\t\t\t\t\t\t[]\tF2\n\n"
+           "\t\t\t\t\t\t\t[]\tF3\n\n"
+           "\t\t\t\t\t\t\t[]\tF4\n\n"
+           "LAST Command: SD \n"
+           "Message: ERROR no deck provided\n"
+           "INPUT >");
+    }else {
+        Node* temp = head;
+
+        if (strcmp(filename, "None") == 0) {
+            FILE* file = fopen("cards.txt", "w");
+
+            for (int i = 0; i < 52; i++) {
+                fprintf(file, "%s\n", temp -> value);
+                temp = temp -> next;
+            }
+        }else {
+            FILE* file = fopen(filename, "w");
+
+            for (int i = 0; i < 52; i++) {
+                fprintf(file, "%s\n", temp -> value);
+                temp = temp -> next;
+            }
+        }
+        printf("c1\tc2\tc3\tc4\tc5\tc6\tc7\n"
+           "\t\t\t\t\t\t\t[]\tF1\n\n"
+           "\t\t\t\t\t\t\t[]\tF2\n\n"
+           "\t\t\t\t\t\t\t[]\tF3\n\n"
+           "\t\t\t\t\t\t\t[]\tF4\n\n"
+           "LAST Command: SD\n"
+           "Message: OK\n"
+           "INPUT >");
+    }
+}
