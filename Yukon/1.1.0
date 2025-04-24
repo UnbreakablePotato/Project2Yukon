@@ -155,6 +155,10 @@ int main(void) {
                     "Message: ERROR: Invalid command during play phase...\n"
                     "INPUT >");
 
+                        }else if ((playOperations == 1) && (strcmp(playOperation, "Q") == 0)) {
+                            printf("LAST Command: Q\n"
+                            "Message:OK! Returning to start phase...\n"
+                            "INPUT >");
                         }
                     }
                 }
