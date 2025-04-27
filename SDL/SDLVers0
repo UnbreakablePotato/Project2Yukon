@@ -1,0 +1,103 @@
+
+#define SDL_MAIN_USE_CALLBACKS_1
+#define SDL_WINDOW_RESIZABLE
+#include <stdio.h>
+#include <SDL3/SDL_main.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
+
+//board størrelse
+#define N 9
+
+//Kort op eller ned
+#define CARD_DOWN 0
+#define CARD_UP 1
+
+//game state
+#define RUNNING_STATE 0
+#define PLAYER_WON_STATE 1
+#define QUIT_STATE 2
+
+
+
+typedef struct {
+    int board[N * N];
+    int card;
+    int state;
+
+
+}yukon;
+
+
+static SDL_Window *window = NULL;
+static SDL_Renderer *renderer = NULL;
+
+void render_game(SDL_Renderer *renderer, const yukon *game) {
+
+}
+
+void click_card(yukon *game, int row, int col) {
+    
+}
+
+//funktion som kører en gang ved startup
+SDL_AppResult SDL_AppInit(void**appstate,int argc, char *argv[]) {
+    SDL_SetAppMetadata("Yukon", "1.0 ", "Yukon");
+
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
+        SDL_Log("Couldn't start SDL: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+
+    if (!SDL_CreateWindow("Yukon",1080,800,SDL_WINDOW_RESIZABLE)) {
+        SDL_Log("GG: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+    bool SDL_SetWindowResizable(SDL_Window *window, bool resizable);
+    return SDL_APP_CONTINUE;
+}
+
+SDL_AppResult SDL_AppEvent(void *appstate,SDL_Event *event) {
+    if (event->type==SDL_EVENT_QUIT) {
+        return SDL_APP_SUCCESS;
+    }
+    return SDL_APP_CONTINUE;
+}
+
+SDL_AppResult SDL_AppIterate(void *appstate) {
+    //en timer der skifter farve hvert sekund
+    const double now = ((double)SDL_GetTicks())/1000.0;
+
+    //farver jeg ikke bruger
+    const float red = (float) (0.5+0.5 * SDL_sin(now));
+    const float green = (float) (0.5+0.5 * SDL_sin(now + SDL_PI_D * 2/3));
+    const float blue = (float) (0.5+0.5 * SDL_sin(now + SDL_PI_D * 4/3));
+
+    /*SDL_Event e;
+    int quit = 0;
+    while (!quit) {
+        while (SDL_PollEvent((&e))) {
+            switch (e.type) {
+                case SDL_EVENT_QUIT:
+                quit=1;
+                    break;
+
+                    deafult:{}
+            }
+        }
+    }*/
+    SDL_SetRenderDrawColor(renderer,0,0,0,255);
+
+    SDL_RenderClear(renderer);
+
+    SDL_RenderPresent(renderer);
+
+
+    return SDL_APP_CONTINUE;
+}
+
+
+
+void SDL_AppQuit(void *appstate,SDL_AppResult result) {
+
+}
