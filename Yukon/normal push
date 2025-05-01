@@ -71,6 +71,7 @@ void ClearList(Node** head);
 Node* saveDeck(Node* head);
 
 int flag = 0;
+int flagP = 0;
 
 //standard deck to load with no file input
 const char* values[52] = {"AC", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "TC", "JC", "QC", "KC",
@@ -110,10 +111,12 @@ int main(void) {
             if ((Operations == 1) && (strcmp(Operation, "LD") == 0)) {
                 LD("None");
                 flag = 0;
+                flagP = 1;
                 ClearList(&SRHead);
             } else if ((Operations == 2) && (strcmp(Operation, "LD") == 0)) {
                 LD(ExtraOperation);
                 flag = 0;
+                flagP = 1;
                 ClearList(&SRHead);
             }else if ((Operations == 1) && (strcmp(Operation, "SW") == 0)) {
                 SW();
@@ -129,7 +132,7 @@ int main(void) {
                 deckSplit(num);
             } else if ((Operations == 1) && (strcmp(Operation, "SR") == 0)) {
                 shuffleRandom(head);
-            } else if ((Operations == 1) && (strcmp(Operation, "P") == 0)){
+            } else if ((Operations == 1) && (strcmp(Operation, "P") == 0) && flagP == 1){
 
 
                 //save deck to use later if you want to restart
@@ -138,8 +141,10 @@ int main(void) {
                 }else {
                     SavedDeck = saveDeck(SRHead);
                 }
+                if (flagP = 1) {
+                    P();
+                }
 
-                P();
 
                 //PlayPhase while loop
                 memset(playOperation,0,sizeof(playOperation)); //Deletes old playphase operations
@@ -168,10 +173,11 @@ int main(void) {
                             "INPUT >", playOperation);
                         }
                     }
-                }
-                printf("LAST Command: Q\n"
+                    printf("LAST Command: Q\n"
                     "Message: Leaving Play Phase!\n"
                     "INPUT >");
+                }
+
                 //Freeing all game columns and foundations (Lists)
                 ClearList(&SRHead);
                 ClearList(&head);
@@ -196,6 +202,10 @@ int main(void) {
                 SixthHead = NULL;
                 SeventhHead = NULL;
                 head = saveDeck(SavedDeck);
+            }else if ((Operations == 1) && (strcmp(Operation, "P") == 0) && flagP == 0) {
+                    printf("LAST Command: %s\n"
+                    "Message: ERROR: No deck provided!\n"
+                    "INPUT >", Operation);
             }else if (strcmp("QQ", Operation) != 0){
                 printf("LAST Command: %s\n"
                     "Message: Unknown Command\n"
